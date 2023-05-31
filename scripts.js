@@ -30,23 +30,40 @@ html.list.items.appendChild(starting)
 html.search.populateDropDown(html.search.genres, 'Genres', genres)
 html.search.populateDropDown(html.search.authors, 'Authors', authors)
 
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    html.theme.settings_theme.value = 'night'
-    document.documentElement.style.setProperty('--color-dark', html.theme.night.dark);
-    document.documentElement.style.setProperty('--color-light', html.theme.night.light);
-} else {
-    html.theme.settings_theme.value = 'day'
-    document.documentElement.style.setProperty('--color-dark', html.theme.day.dark);
-    document.documentElement.style.setProperty('--color-light', html.theme.day.light);
+/**
+ * Function that sets the app theme property
+ * @param {string} theme - string theme you want to set
+ */
+const setThemeProperty = (theme) => {
+    if(theme === 'night') {
+        document.documentElement.style.setProperty('--color-dark', html.theme.night.dark);
+        document.documentElement.style.setProperty('--color-light', html.theme.night.light);
+    } else {
+        document.documentElement.style.setProperty('--color-dark', html.theme.day.dark);
+        document.documentElement.style.setProperty('--color-light', html.theme.day.light);
+    }
 }
 
-html.list.button.innerText = `Show more (${books.length - BOOKS_PER_PAGE})`
-html.list.button.disabled = (matches.length - (page * BOOKS_PER_PAGE)) > 0
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    html.theme.settings_theme.value = 'night'
+    setThemeProperty('night')
+} else {
+    html.theme.settings_theme.value = 'day'
+    setThemeProperty('day')
+}
 
-html.list.button.innerHTML = `
-    <span>Show more</span>
-    <span class="list__remaining"> (${(matches.length - (page * BOOKS_PER_PAGE)) > 0 ? (matches.length - (page * BOOKS_PER_PAGE)) : 0})</span>
-`
+const updateListBtn = (books, matches, page, booksPerPage) => {
+    html.list.button.innerText = `Show more (${books.length - booksPerPage})`
+    console.log(matches.length - (page * booksPerPage))
+    html.list.button.disabled = (matches.length - (page * booksPerPage)) < 0
+
+    html.list.button.innerHTML = `
+        <span>Show more</span>
+        <span class="list__remaining"> (${(matches.length - (page * booksPerPage)) > 0 ? (matches.length - (page * booksPerPage)) : 0})</span>
+    `
+}
+
+updateListBtn(books, matches, page, BOOKS_PER_PAGE)
 
 html.search.cancel.addEventListener('click', () => {
     html.search.overlay.open = false
@@ -74,13 +91,7 @@ html.theme.settings_form.addEventListener('submit', (event) => {
     const formData = new FormData(event.target)
     const { theme } = Object.fromEntries(formData)
 
-    if (theme === 'night') {
-        document.documentElement.style.setProperty('--color-dark', html.theme.night.dark)
-        document.documentElement.style.setProperty('--color-light', html.theme.night.light)
-    } else {
-        document.documentElement.style.setProperty('--color-dark', html.theme.day.dark)
-        document.documentElement.style.setProperty('--color-light', html.theme.day.light)
-    }
+    setThemeProperty(theme)
     
     html.theme.overlay.open = false
 })
