@@ -1,15 +1,21 @@
-# DWA_06.5 Challenge 1
+# DWA_07.4 Challenge 1
 
 ## Project Description
 
-This exercise presents you with a working version of the [“Book Connect”](https://github.com/CodeSpace-Academy/book-connect) website you previously audited as your [final challenge](https://github.com/katlegomaphango/KATMAP076_FTO2301_GroupB_KatlegoMaphango_ITW19). However, you must use objects and functions as abstractions to make the code more maintainable, extendable and easier to change.
-Also, please remember that you are encouraged to consider higher-level concepts discussed in the previous lessons, such as documentation, Styleguides and abstractions.
-As always, it is essential to note that you will be required to talk about the “how” and “why” you made specific decisions and not just present the “what” of the decisions that you made.
+In this challenge, you will revisit the previous abstractions you created in the [“Book Connect”](https://github.com/katlegomaphango/DWA-6) project and consider them through the lens of SOLID.
+
+Take a moment to rate all your abstractions in terms of the best three and the worst three. Attempt to apply SOLID principles to the worst three as means to improve them.
+
+You will have a call with your coach where you highlight the following:
+
+- Which were the three best abstractions, and why?
+- Which were the three worst abstractions, and why?
+- How can the three worst abstractions be improved via SOLID principles?
 
 ## Getting Started: 
 1. Clone repo
 ```
-git clone https://github.com/katlegomaphango/DWA-6.git
+git clone https://github.com/katlegomaphango/DWA-7.git
 ```
 2. Run localhost server
 3. Open index.html
