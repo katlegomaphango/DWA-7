@@ -190,7 +190,7 @@ html.list.button.addEventListener('click', () => {
     page += 1
 })
 
-html.list.items.addEventListener('click', (event) => {
+const bookSummaryHandler = (event) => {
     const pathArray = Array.from(event.path || event.composedPath())
     let active = null
 
@@ -217,4 +217,6 @@ html.list.items.addEventListener('click', (event) => {
         html.summary.subtitle.innerText = `${authors[active.author]} (${new Date(active.published).getFullYear()})`
         html.summary.description.innerText = active.description
     }
-})
+}
+
+html.list.items.addEventListener('click', bookSummaryHandler)
