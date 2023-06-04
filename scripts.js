@@ -190,12 +190,12 @@ html.list.button.addEventListener('click', () => {
     page += 1
 })
 
-const bookSummaryHandler = (event) => {
+const findBookNode = (event) => {
     const pathArray = Array.from(event.path || event.composedPath())
-    let active = null
+    let activeNode = null
 
     for (const node of pathArray) {
-        if (active) break
+        if (activeNode) break
 
         if (node?.dataset?.preview) {
             let result = null
@@ -205,9 +205,15 @@ const bookSummaryHandler = (event) => {
                 if (singleBook.id === node?.dataset?.preview) result = singleBook
             } 
         
-            active = result
+            activeNode = result
         }
     }
+
+    return activeNode
+}
+
+const bookSummaryHandler = (event) => {
+    let active = findBookNode(event)
     
     if (active) {
         html.summary.active.open = true
