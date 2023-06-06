@@ -3,29 +3,33 @@ import { books, authors, genres, BOOKS_PER_PAGE, html } from './data.js'
 let page = 1;
 let matches = books
 
-const starting = document.createDocumentFragment()
+const createHtmlElement = (itemsArray) => {
+    const newItems = document.createDocumentFragment()
 
-for (const { author, id, image, title } of matches.slice(0, BOOKS_PER_PAGE)) {
-    const element = document.createElement('button')
-    element.classList = 'preview'
-    element.setAttribute('data-preview', id)
+    for (const { author, id, image, title } of itemsArray) {
+        const element = document.createElement('button')
+        element.classList = 'preview'
+        element.setAttribute('data-preview', id)
+    
+        element.innerHTML = `
+            <img
+                class="preview__image"
+                src="${image}"
+            />
+            
+            <div class="preview__info">
+                <h3 class="preview__title">${title}</h3>
+                <div class="preview__author">${authors[author]}</div>
+            </div>
+        `
 
-    element.innerHTML = `
-        <img
-            class="preview__image"
-            src="${image}"
-        />
-        
-        <div class="preview__info">
-            <h3 class="preview__title">${title}</h3>
-            <div class="preview__author">${authors[author]}</div>
-        </div>
-    `
+        newItems.appendChild(element)
+    }
 
-    starting.appendChild(element)
+    return newItems
 }
 
-html.list.items.appendChild(starting)
+html.list.items.appendChild(createHtmlElement(matches))
 
 html.search.populateDropDown(html.search.genres, 'Genres', genres)
 html.search.populateDropDown(html.search.authors, 'Authors', authors)
@@ -52,18 +56,19 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
     setThemeProperty('day')
 }
 
-const updateListBtn = (books, matches, page, booksPerPage) => {
-    html.list.button.innerText = `Show more (${books.length - booksPerPage})`
-    console.log(matches.length - (page * booksPerPage))
-    html.list.button.disabled = (matches.length - (page * booksPerPage)) < 0
+const updateShowMoreBtn = (bookArray, minBooks) => {
+    html.list.button.innerText = `Show more (${bookArray.length - (page * BOOKS_PER_PAGE)})`
+    html.list.button.disabled = (bookArray.length - (page * BOOKS_PER_PAGE)) < minBooks
 
     html.list.button.innerHTML = `
         <span>Show more</span>
-        <span class="list__remaining"> (${(matches.length - (page * booksPerPage)) > 0 ? (matches.length - (page * booksPerPage)) : 0})</span>
+        <span class="list__remaining"> (${(bookArray.length - (page * BOOKS_PER_PAGE)) > 0 ? (bookArray.length - (page * BOOKS_PER_PAGE)) : 0})</span>
     `
 }
 
-updateListBtn(books, matches, page, BOOKS_PER_PAGE)
+updateShowMoreBtn(matches, 0)
+page += 1
+
 
 html.search.cancel.addEventListener('click', () => {
     html.search.overlay.open = false
@@ -96,10 +101,7 @@ html.theme.settings_form.addEventListener('submit', (event) => {
     html.theme.overlay.open = false
 })
 
-html.search.form.addEventListener('submit', (event) => {
-    event.preventDefault()
-    const formData = new FormData(event.target)
-    const filters = Object.fromEntries(formData)
+const filterBookArray = (filters) => {
     const result = []
 
     for (const book of books) {
@@ -119,75 +121,39 @@ html.search.form.addEventListener('submit', (event) => {
         }
     }
 
-    page = 1;
-    matches = result
+    return result
+}
 
-    if (result.length < 1) {
+html.search.form.addEventListener('submit', (event) => {
+    event.preventDefault()
+    const formData = new FormData(event.target)
+    const filters = Object.fromEntries(formData)
+
+    page = 1;
+    matches = filterBookArray(filters)
+
+    if (matches.length < 1) {
         html.list.message.classList.add('list__message_show')
     } else {
         html.list.message.classList.remove('list__message_show')
     }
 
     html.list.items.innerHTML = ''
-    const newItems = document.createDocumentFragment()
 
-    for (const { author, id, image, title } of result.slice(0, BOOKS_PER_PAGE)) {
-        const element = document.createElement('button')
-        element.classList = 'preview'
-        element.setAttribute('data-preview', id)
-    
-        element.innerHTML = `
-            <img
-                class="preview__image"
-                src="${image}"
-            />
-            
-            <div class="preview__info">
-                <h3 class="preview__title">${title}</h3>
-                <div class="preview__author">${authors[author]}</div>
-            </div>
-        `
+    html.list.items.appendChild(createHtmlElement(matches.slice(0, BOOKS_PER_PAGE)))
 
-        newItems.appendChild(element)
-    }
-
-    html.list.items.appendChild(newItems)
-    html.list.button.disabled = (matches.length - (page * BOOKS_PER_PAGE)) < 1
-
-    html.list.button.innerHTML = `
-        <span>Show more</span>
-        <span class="list__remaining"> (${(matches.length - (page * BOOKS_PER_PAGE)) > 0 ? (matches.length - (page * BOOKS_PER_PAGE)) : 0})</span>
-    `
+    updateShowMoreBtn(matches, 1)
 
     window.scrollTo({top: 0, behavior: 'smooth'});
     html.search.overlay.open = false
 })
 
 html.list.button.addEventListener('click', () => {
-    const fragment = document.createDocumentFragment()
+    const extracted = matches.slice(page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE)
 
-    for (const { author, id, image, title } of matches.slice(page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE)) {
-        const element = document.createElement('button')
-        element.classList = 'preview'
-        element.setAttribute('data-preview', id)
-    
-        element.innerHTML = `
-            <img
-                class="preview__image"
-                src="${image}"
-            />
-            
-            <div class="preview__info">
-                <h3 class="preview__title">${title}</h3>
-                <div class="preview__author">${authors[author]}</div>
-            </div>
-        `
+    html.list.button.innerText = `Show more (${extracted.length})`
 
-        fragment.appendChild(element)
-    }
-
-    html.list.items.appendChild(fragment)
-    page += 1
+    html.list.items.appendChild(createHtmlElement(extracted))
 })
 
 const findBookNode = (event) => {
@@ -211,7 +177,6 @@ const findBookNode = (event) => {
 
     return activeNode
 }
-
 const bookSummaryHandler = (event) => {
     let active = findBookNode(event)
     
